@@ -1,0 +1,3 @@
+https://a6fde8fe8a81.ngrok-free.app
+https://api.telegram.org/bot7829054440:AAE9FPk0wonqYlqfns33i37iHfH48LRyjiI/setWebhook?url=https://75f48f6336a6.ngrok-free.app/webhook
+https://api.telegram.org/bot7829054440:AAE9FPk0wonqYlqfns33i37iHfH48LRyjiI/getWebhookInfo

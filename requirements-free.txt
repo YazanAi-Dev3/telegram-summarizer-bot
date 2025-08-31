@@ -1,0 +1,7 @@
+fastapi
+uvicorn
+python-telegram-bot
+sqlmodel[sqlite]
+python-dotenv
+nltk
+sumy
