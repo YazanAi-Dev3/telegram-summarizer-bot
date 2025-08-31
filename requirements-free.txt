@@ -5,3 +5,4 @@ sqlmodel[sqlite]
 python-dotenv
 nltk
 sumy
+pyarabic
