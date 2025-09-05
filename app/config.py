@@ -14,3 +14,7 @@ LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO")
 # Read the summarizer mode, defaulting to "traditional" if not set.
 # It can be "traditional" or "transformer"
 SUMMARIZER_MODE = os.getenv("SUMMARIZER_MODE", "traditional")
+DATABASE_URL = os.getenv("DATABASE_URL") 
+
+if not DATABASE_URL:
+    raise ValueError("DATABASE_URL not found! Please set it in your environment.")
