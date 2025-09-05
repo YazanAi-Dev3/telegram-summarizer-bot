@@ -27,12 +27,11 @@ jobs:
           BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
         run: pytest
 
-  # Job 2: Build and Push Docker Image
+
+  # Job 2: Build and Push Docker Image (Updated Version)
   build-and-push:
-    # This job will only start if the 'test' job completes successfully
     needs: test
     runs-on: ubuntu-latest
-    # We need to grant permissions for the job to write to the container registry
     permissions:
       contents: read
       packages: write
@@ -48,12 +47,19 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      # --- THE IMPORTANT CHANGE IS HERE ---
+      # Step to convert the repository name to lowercase
+      - name: Prepare image tags
+        id: prep
+        run: |
+          IMAGE_NAME=$(echo ${{ github.repository }} | tr '[:upper:]' '[:lower:]')
+          echo "IMAGE_TAG=ghcr.io/$IMAGE_NAME" >> $GITHUB_OUTPUT
+
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
         with:
           context: .
-          # We use the lightweight requirements file for the final image
           file: ./Dockerfile
           push: true
-          # Create a tag for the image, e.g., ghcr.io/your-username/your-repo:latest
-          tags: ghcr.io/${{ github.repository }}:latest
+          # Use the lowercase tag generated in the previous step
+          tags: ${{ steps.prep.outputs.IMAGE_TAG }}:latest
