@@ -28,7 +28,8 @@ jobs:
         run: pytest
 
 
-  # Job 2: Build and Push Docker Image (Updated Version)
+
+  # Job 2: Build, Push, and Deploy
   build-and-push:
     needs: test
     runs-on: ubuntu-latest
@@ -47,8 +48,6 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      # --- THE IMPORTANT CHANGE IS HERE ---
-      # Step to convert the repository name to lowercase
       - name: Prepare image tags
         id: prep
         run: |
@@ -61,5 +60,9 @@ jobs:
           context: .
           file: ./Dockerfile
           push: true
-          # Use the lowercase tag generated in the previous step
           tags: ${{ steps.prep.outputs.IMAGE_TAG }}:latest
+      
+      # --- THE NEW STEP IS HERE ---
+      - name: Trigger deployment on Render
+        # This step runs only if the build and push is successful
+        run: curl -X POST ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
