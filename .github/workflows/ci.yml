@@ -1,0 +1,46 @@
+# .github/workflows/ci.yml
+
+# The name of our workflow. It will appear in the "Actions" tab on GitHub.
+name: Python CI - Run Tests
+
+# This section defines when the workflow should run.
+on:
+  # Run this workflow on every push to the "main" branch.
+  push:
+    branches: [ "main" ]
+  # Also allow running it manually from the Actions tab.
+  workflow_dispatch:
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel.
+jobs:
+  # We define a single job called "build-and-test".
+  build-and-test:
+    # The type of virtual machine to run the job on. We use the latest Ubuntu.
+    runs-on: ubuntu-latest
+
+    # A job is a sequence of steps.
+    steps:
+      # Step 1: Check out the repository's code
+      # This downloads your code onto the virtual machine.
+      - name: Check out repository code
+        uses: actions/checkout@v4
+
+      # Step 2: Set up a Python environment
+      # This installs a specific version of Python.
+      - name: Set up Python 3.9
+        uses: actions/setup-python@v5
+        with:
+          python-version: 3.9
+
+      # Step 3: Install dependencies
+      # This runs pip install using the full requirements file.
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      # Step 4: Run the tests with pytest
+      # This is the most important step. If this command fails, the entire workflow fails.
+      - name: Run tests with pytest
+        run: |
+          pytest
