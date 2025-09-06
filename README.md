@@ -1,30 +1,35 @@
 # Telegram Conversation Summarizer Bot
 
-A sophisticated, dual-engine Telegram bot designed to summarize conversations within groups. This bot is built with a modular and scalable architecture, featuring a database for message archiving and a configurable summarization engine.
+A professionally engineered, dual-engine Telegram bot service designed to summarize conversations within groups. This project has evolved from a simple script into a fully automated, testable, and deployable service with a persistent database and a complete CI/CD pipeline.
 
-The primary use case is to help users who have been away from a busy group to quickly catch up on the discussions they missed.
+The primary use case is to help users who have been away from a busy group to quickly catch up on the discussions they missed by providing accurate summaries of conversation segments.
 
 ---
 
-## Features
+## Core Features
 
-* **Dual Summarization Engines**: Switch between a high-quality, Transformer-based abstractive summarizer and a lightweight, traditional extractive summarizer via a simple configuration change.
-* **Database Archiving**: Automatically archives all messages from a group into a local SQLite database for later retrieval.
-* **Conversation Range Summarization**: Users can specify the exact portion of a conversation to summarize by replying to a starting message.
+* **Dual Summarization Engines**: Easily switch between a high-quality, Transformer-based abstractive summarizer and a lightweight, traditional extractive summarizer via a simple configuration change.
+* **Persistent Database Archiving**: Automatically archives all messages from a group into a persistent PostgreSQL database, ensuring data is never lost.
+* **Conversation Range Summarization**: Users can specify the exact portion of a conversation to summarize by replying to a starting message, or summarize the most recent messages.
 * **Hybrid Summarization Logic**: Intelligently handles very long conversations by splitting them into chunks, summarizing each part, and then summarizing the results for a comprehensive final output.
-* **Dockerized**: Comes with a `Dockerfile` for easy, consistent deployment on any cloud platform.
-* **Professional Architecture**: Built with a clean, modular design (Separation of Concerns) for high maintainability and scalability.
+* **Automated Testing Suite**: Includes a full suite of unit and integration tests using `pytest` to ensure code quality and reliability.
+* **Continuous Integration & Delivery (CI/CD)**: Features a complete GitHub Actions pipeline that automatically runs tests, builds a new Docker image, and triggers deployment on every push to the main branch.
+* **Rich Command Set**: Includes user-friendly commands like `/help` for guidance and `/stats` for displaying chat analytics queried directly from the database.
+* **Dockerized for Portability**: Comes with a `Dockerfile` for easy, consistent deployment on any cloud platform that supports containers.
 
 ---
 
 ## Tech Stack
 
 * **Backend**: Python, FastAPI
-* **Telegram API**: `python-telegram-bot`
-* **Database**: SQLite with SQLModel (ORM)
+* **Telegram Integration**: `python-telegram-bot`
+* **Database**: PostgreSQL
+* **ORM**: SQLModel
 * **AI Engine (Pro)**: `transformers` (Hugging Face)
 * **AI Engine (Lightweight)**: `sumy` & `nltk`
-* **Deployment**: Docker
+* **Testing**: `pytest`, `pytest-asyncio`, `httpx`
+* **CI/CD**: GitHub Actions, Docker
+* **Deployment**: Render
 
 ---
 
@@ -48,9 +53,9 @@ Follow these steps to run the project on your local machine.
     ```
 
 3.  **Install dependencies:**
-    The project includes two requirements files. For the full version (including Transformers), use `requirements.txt`. For the lightweight, free-to-deploy version, use `requirements-free.txt`.
+    Use `requirements.txt` for the full version (including Transformers) or `requirements-free.txt` for the lightweight version.
     ```bash
-    pip install -r requirements-free.txt
+    pip install -r requirements.txt
     ```
 
 4.  **Set up environment variables:**
@@ -58,25 +63,22 @@ Follow these steps to run the project on your local machine.
     ```bash
     copy .env.example .env
     ```
-    Now, edit the `.env` file with your Telegram Bot Token.
+    Edit the `.env` file with your Telegram Bot Token and your external PostgreSQL database URL.
 
 5.  **Run the application:**
     ```bash
     python main.py
     ```
-    The server will start on `http://localhost:8000`. Use a tool like `ngrok` to expose it for testing with Telegram.
+    The server will start on `http://localhost:8000`.
 
 ---
 
 ## How to Use
 
-1.  Add the bot to your Telegram group and grant it administrator permissions (specifically, the permission to read messages).
-2.  To get a summary, find the first message you want to include in the conversation.
-3.  Reply to that message with the command `/summarize`.
-4.  The bot will fetch all messages from the starting point to your command from its archive and provide a summary.
-
----
-
-## Deployment
-
-This application is ready for deployment using Docker. The included `Dockerfile` is optimized for a lightweight build when using the traditional summarization engine. It can be deployed on any platform that supports Docker containers, such as Render or Heroku. Remember to set the environment variables in your deployment service's dashboard.
+1.  Add the bot to your Telegram group and grant it administrator permissions.
+2.  Use the following commands:
+    * `/start`: Displays the welcome message.
+    * `/help`: Shows a detailed list of all commands.
+    * `/summarize`: **Reply** to the first message of a conversation to summarize everything from that point to your command.
+    * `/summarize_last [N]`: Summarizes the last N messages (e.g., `/summarize_last 20`). Defaults to 50.
+    * `/stats`: Displays statistics about the archived messages in the chat.
