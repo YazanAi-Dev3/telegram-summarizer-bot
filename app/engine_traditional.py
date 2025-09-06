@@ -1,10 +1,11 @@
-# app/engine_traditional.py (Corrected Arabic-Enabled Version)
+# app/engine_traditional.py (Improved Arabic Version)
 
 import logging
 from sumy.parsers.plaintext import PlaintextParser
 from sumy.nlp.tokenizers import Tokenizer
-from sumy.summarizers.lsa import LsaSummarizer # <-- Corrected Import
-# We don't need a stemmer for Arabic with this library, it can work without it.
+from sumy.summarizers.lsa import LsaSummarizer
+from nltk.corpus import stopwords # Import stopwords from NLTK
+from nltk.stem.isri import ISRIStemmer # Import the Arabic stemmer from NLTK
 
 logger = logging.getLogger(__name__)
 
@@ -12,28 +13,26 @@ logger = logging.getLogger(__name__)
 LANGUAGE = "arabic"
 SENTENCES_COUNT = 5 # Number of sentences to return in the summary
 
-ARABIC_STOP_WORDS = [
-    "في", "من", "على", "و", "هو", "هي", "كان", "كانت", "أن", "أو", "إلى", "عن", 
-    "هذا", "هذه", "ذلك", "تلك", "هنا", "هناك", "قد", "لقد", "أي", "مع", "به", "له",
-    "قال", "قالت", "يكون", "تكون", "تم", "التي", "الذي", "الذين", "كل", "بعض", "ما"
-]
-
-logger.info("Initializing Traditional (Sumy) engine for ARABIC.")
+logger.info("Initializing Traditional (Sumy) engine with NLTK Arabic enhancements.")
 
 def summarize_chunk(text: str) -> str:
     """
     Summarizes a single piece of text using an extractive (LSA) method,
-    configured for the Arabic language.
+    enhanced with NLTK's Arabic stemmer and stopwords.
     """
     logger.debug(f"Starting extractive summarization for an Arabic chunk with length: {len(text)}")
     
+    # Use a tokenizer that understands Arabic.
     parser = PlaintextParser.from_string(text, Tokenizer(LANGUAGE))
     
-    # Initialize the LSA summarizer
-    summarizer = LsaSummarizer() # This should now be recognized
+    # Initialize the Arabic stemmer from NLTK.
+    stemmer = ISRIStemmer()
     
-    # Set the custom stop words for Arabic
-    summarizer.stop_words = ARABIC_STOP_WORDS
+    # Initialize the LSA summarizer and provide it with our new stemmer.
+    summarizer = LsaSummarizer(stemmer)
+    
+    # Use the comprehensive list of Arabic stopwords from NLTK.
+    summarizer.stop_words = stopwords.words(LANGUAGE)
     
     # Generate the summary
     summary_sentences = [str(sentence) for sentence in summarizer(parser.document, SENTENCES_COUNT)]
