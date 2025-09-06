@@ -3,7 +3,7 @@
 import pytest
 from httpx import AsyncClient, ASGITransport
 from app.webhook_handler import app
-
+from telegram.helpers import escape_markdown
 # We mark all tests in this file as asyncio tests
 pytestmark = pytest.mark.asyncio
 
@@ -115,16 +115,12 @@ async def test_webhook_with_stats_command(monkeypatch):
 async def test_webhook_with_summarize_last_command(monkeypatch):
     """Tests the /webhook endpoint for the /summarize_last command."""
     # 1. Mock the database function
-    retrieved_messages = []
     def mock_get_last_n(session, chat_id, limit):
-        nonlocal retrieved_messages
-        # Simulate returning 'limit' number of message objects
         class MockMessage:
             def __init__(self, sender, text):
                 self.sender_name = sender
                 self.text = text
-        retrieved_messages = [MockMessage("User", f"Message {i}") for i in range(limit)]
-        return retrieved_messages
+        return [MockMessage("User", f"Message {i}") for i in range(limit)]
     
     monkeypatch.setattr("app.logic_controller.get_last_n_messages", mock_get_last_n)
 
@@ -156,7 +152,13 @@ async def test_webhook_with_summarize_last_command(monkeypatch):
         await client.post("/webhook", json=test_update)
 
     # 5. Assert the results
-    # The bot sends two messages: an acknowledgment and the summary
     assert len(sent_messages_to_user) == 2
     assert "Got it! Summarizing the last 25 messages" in sent_messages_to_user[0]
-    assert "This is a summary of 25 messages." in sent_messages_to_user[1]
+    
+    # --- THE IMPORTANT CHANGE IS HERE ---
+    # We create the expected summary, then we sanitize it, just like the real app does.
+    expected_summary = "This is a summary of 25 messages."
+    sanitized_expected_summary = escape_markdown(expected_summary, version=2)
+    
+    # Now we check for the sanitized version in the final message.
+    assert sanitized_expected_summary in sent_messages_to_user[1]
