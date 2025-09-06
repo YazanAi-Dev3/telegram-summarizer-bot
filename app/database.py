@@ -82,3 +82,25 @@ def get_chat_statistics(session: Session, chat_id: int) -> Dict[str, Any]:
     
     logger.info(f"Found stats for chat {chat_id}: {stats}")
     return stats
+
+def get_last_n_messages(session: Session, chat_id: int, limit: int = 50) -> List[Message]:
+    """
+    Queries the database to get the last N messages from a specific chat.
+    """
+    logger.info(f"Querying database for the last {limit} messages in chat {chat_id}")
+    
+    statement = (
+        select(Message)
+        .where(Message.chat_id == chat_id)
+        .order_by(desc(Message.timestamp)) # Get the newest messages first
+        .limit(limit)
+    )
+    
+    results = session.exec(statement).all()
+    
+    # The results are in reverse chronological order (newest to oldest),
+    # so we reverse them back to the correct order (oldest to newest).
+    results.reverse()
+    
+    logger.info(f"Found {len(results)} messages in the database.")
+    return results
