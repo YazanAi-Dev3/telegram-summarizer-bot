@@ -1,17 +1,16 @@
-# app/engine_traditional.py (Improved Arabic Version)
+# app/engine_traditional.py (Corrected Stemmer Version)
 
 import logging
 from sumy.parsers.plaintext import PlaintextParser
 from sumy.nlp.tokenizers import Tokenizer
 from sumy.summarizers.lsa import LsaSummarizer
-from nltk.corpus import stopwords # Import stopwords from NLTK
-from nltk.stem.isri import ISRIStemmer # Import the Arabic stemmer from NLTK
+from nltk.corpus import stopwords
+from nltk.stem.isri import ISRIStemmer
 
 logger = logging.getLogger(__name__)
 
-# --- Configuration for Arabic ---
 LANGUAGE = "arabic"
-SENTENCES_COUNT = 5 # Number of sentences to return in the summary
+SENTENCES_COUNT = 5
 
 logger.info("Initializing Traditional (Sumy) engine with NLTK Arabic enhancements.")
 
@@ -22,14 +21,14 @@ def summarize_chunk(text: str) -> str:
     """
     logger.debug(f"Starting extractive summarization for an Arabic chunk with length: {len(text)}")
     
-    # Use a tokenizer that understands Arabic.
     parser = PlaintextParser.from_string(text, Tokenizer(LANGUAGE))
     
-    # Initialize the Arabic stemmer from NLTK.
-    stemmer = ISRIStemmer()
+    # --- THE IMPORTANT CHANGE IS HERE ---
+    # 1. Initialize the Arabic stemmer object from NLTK.
+    stemmer_instance = ISRIStemmer()
     
-    # Initialize the LSA summarizer and provide it with our new stemmer.
-    summarizer = LsaSummarizer(stemmer)
+    # 2. Initialize the LSA summarizer. We pass the .stem METHOD, not the whole object.
+    summarizer = LsaSummarizer(stemmer_instance.stem)
     
     # Use the comprehensive list of Arabic stopwords from NLTK.
     summarizer.stop_words = stopwords.words(LANGUAGE)
