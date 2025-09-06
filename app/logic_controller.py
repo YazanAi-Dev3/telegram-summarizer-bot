@@ -4,7 +4,7 @@ import logging
 from telegram import Update
 from sqlmodel import Session
 from app import summarization_service, telegram_service
-from app.database import Message, get_messages_in_range
+from app.database import Message, get_messages_in_range, get_chat_statistics
 from telegram.helpers import escape_markdown
 
 logger = logging.getLogger(__name__)
@@ -49,9 +49,24 @@ async def handle_update(update: Update, session: Session):
             "Here are the available commands:\n\n"
             "1.  `/start` - Displays the welcome message.\n\n"
             "2.  `/summarize` - To use this, you must **reply** to the first message of the conversation you want to summarize. The bot will then summarize everything from that message to your command.\n\n"
-            "3.  `/help` - Shows this help message."
+            "3.  `/help` - Shows this help message.\n\n"
+            "4.  `/stats` - Displays statistics about the archived messages in this chat."
         )
         await telegram_service.send_message(chat_id, help_message)
+        return
+
+    if text.lower().startswith("/stats"):
+        logger.info(f"Stats command received for chat_id: {chat_id}")
+        
+        stats = get_chat_statistics(session, chat_id)
+        
+        stats_message = (
+            f"**📊 Chat Statistics**\n\n"
+            f"▪️ **Total Archived Messages:** {stats['total_messages']}\n"
+            f"▪️ **Most Active User:** {stats['most_active_user']}"
+        )
+        
+        await telegram_service.send_message(chat_id, stats_message)
         return
 
     if text.lower().startswith("/summarize"):
