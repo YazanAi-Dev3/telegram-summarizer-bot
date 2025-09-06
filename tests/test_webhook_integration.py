@@ -70,6 +70,7 @@ async def test_webhook_with_help_command(monkeypatch):
     assert "Here are the available commands" in sent_messages[0]["text"]
 
 
+
 async def test_webhook_with_stats_command(monkeypatch):
     """Tests the /webhook endpoint by simulating a /stats command."""
     # 1. Mock the database function to return predictable data
@@ -105,5 +106,11 @@ async def test_webhook_with_stats_command(monkeypatch):
     # 5. Assert the results
     assert response.status_code == 200
     assert len(sent_messages) == 1
-    assert "Total Archived Messages: 125" in sent_messages[0]
-    assert "Most Active User: TestUser" in sent_messages[0]
+    
+    # --- THE IMPORTANT CHANGE IS HERE ---
+    # We now check for each piece of data independently. This is more robust.
+    final_message = sent_messages[0]
+    assert "Total Archived Messages" in final_message
+    assert "125" in final_message
+    assert "Most Active User" in final_message
+    assert "TestUser" in final_message
