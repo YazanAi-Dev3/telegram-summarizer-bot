@@ -5,24 +5,25 @@ from datetime import datetime
 from typing import Optional, List, Dict, Any
 from sqlmodel import Field, SQLModel, create_engine, Session, select, func, desc
 from app.config import DATABASE_URL
+from sqlalchemy import BIGINT, Column
 
 logger = logging.getLogger(__name__)
 
-# The engine connects to the DATABASE_URL from our config
 engine = create_engine(DATABASE_URL, echo=False)
 
 class Message(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
-    message_id: int = Field(index=True)
-    chat_id: int = Field(index=True)
+    
+    # We use sa_column to specify the exact database type as BIGINT
+    # This is crucial for storing large Telegram IDs.
+    message_id: int = Field(sa_column=Column(BIGINT, index=True))
+    chat_id: int = Field(sa_column=Column(BIGINT, index=True))
+    
     sender_name: str
     text: str
-    timestamp: datetime = Field(default_factory=datetime.utcnow, index=True)
+    timestamp: datetime = Field(index=True) # Removed default factory to use Telegram's timestamp
 
 def create_db_and_tables():
-    """
-    Initializes the database by creating all tables defined by SQLModel.
-    """
     logger.info("Initializing the database and creating tables...")
     SQLModel.metadata.create_all(engine)
     logger.info("Database and tables created successfully.")
