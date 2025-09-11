@@ -12,8 +12,7 @@ COPY requirements-free.txt ./requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Download NLTK data
-RUN python -c "import nltk; nltk.download('punkt')"
-
+RUN python -c "import nltk; nltk.download('stopwords'); nltk.download('punkt')"
 # Copy the rest of the application code
 COPY ./app /app/app
 COPY ./main.py /app/main.py
